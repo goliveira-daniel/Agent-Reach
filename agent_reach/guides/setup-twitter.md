@@ -100,4 +100,4 @@ proxychains twitter search "test" -n 1
 
 ## Fallback：bird CLI
 
-如果你已经安装了 [bird CLI](https://www.npmjs.com/package/@steipete/bird)（`npm install -g @steipete/bird`），它也能正常工作。Agent Reach 会自动检测并使用已安装的 bird。两者功能类似，twitter-cli 是当前推荐方案。
+如果你已经安装了 [bird CLI](https://www.npmjs.com/package/@steipete/bird)，它也能正常工作（本 fork 不安装它）。Agent Reach 会自动检测并使用已安装的 bird。两者功能类似，twitter-cli 是当前推荐方案。
