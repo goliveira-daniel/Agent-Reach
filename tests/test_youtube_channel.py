@@ -170,7 +170,10 @@ def test_constraints_pin_ytdlp_to_current_stable_release():
         if line.startswith("yt-dlp==")
     )
 
-    assert pin == "yt-dlp==2026.07.04"
+    from agent_reach.pins import YTDLP_SPEC
+
+    assert pin == "yt-dlp==2026.8.19"
+    assert YTDLP_SPEC == "yt-dlp[default]==2026.8.19"
 
 
 def test_project_installs_official_ytdlp_default_dependencies():
@@ -240,3 +243,23 @@ def test_check_ok_flags_missing_ffprobe_for_transcription():
     assert status == "ok"
     assert "ffprobe" in message
     assert "可转写音频" not in message
+
+
+def test_every_tool_pin_is_exact():
+    """Installer pins must be exact versions or commits, never ranges or tags like latest."""
+    import re
+
+    from agent_reach import pins
+
+    specs = [
+        pins.MCPORTER_SPEC,
+        pins.OPENCLI_SPEC,
+        pins.UNDICI_SPEC,
+        pins.TWITTER_CLI_SPEC,
+        pins.BILIBILI_CLI_SPEC,
+        pins.YTDLP_SPEC,
+        pins.LINKEDIN_MCP_SPEC,
+    ]
+    for spec in specs:
+        assert re.search(r"(==|@)\d+\.\d+\.\d+$", spec), spec
+    assert "@" in pins.FORK_SOURCE and "main" not in pins.FORK_SOURCE

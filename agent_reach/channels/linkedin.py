@@ -3,6 +3,8 @@
 
 import shutil
 
+from agent_reach.pins import LINKEDIN_MCP_SPEC
+
 from .base import Channel
 from .mcporter import McporterConfigError, inspect_mcporter_config
 
@@ -12,11 +14,11 @@ _LINKEDIN_SERVER_NAMES = {
     "linkedin-scraper-mcp",
     "mcp-server-linkedin",
 }
-_LOGIN_COMMAND = "uvx mcp-server-linkedin@latest --login"
+_LOGIN_COMMAND = f"uvx {LINKEDIN_MCP_SPEC} --login"
 _UV_INSTALL_URL = "https://docs.astral.sh/uv/getting-started/installation/"
 _CONFIG_COMMAND = (
     "mcporter config add linkedin --command uvx "
-    "--arg mcp-server-linkedin@latest --env UV_HTTP_TIMEOUT=300 --scope home"
+    f"--arg {LINKEDIN_MCP_SPEC} --env UV_HTTP_TIMEOUT=300 --scope home"
 )
 
 

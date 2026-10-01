@@ -318,7 +318,7 @@ class TestCLI:
 
         assert cli._install_opencli_deps() is True
         assert calls == [
-            ["C:/Tools/npm.CMD", "install", "-g", backends.OPENCLI_PACKAGE]
+            ["C:/Tools/npm.CMD", "install", "-g", "@jackwener/opencli@1.8.7"]
         ]
 
     def test_install_facebook_instagram_routes_to_opencli_once(self, monkeypatch, capsys):

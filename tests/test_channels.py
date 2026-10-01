@@ -1236,7 +1236,7 @@ class TestBilibiliChannel:
         assert status == "ok"  # 搜索 API 兜底
         assert ch.active_backend == "B站搜索 API"
         assert "备选后端异常" in msg
-        assert "pipx reinstall bilibili-cli" in msg
+        assert "pipx install --force 'bilibili-cli==0.6.2'" in msg
 
     def test_bili_broken_and_no_fallback_reports_error(self, monkeypatch):
         self._isolate(monkeypatch, api_ok=False)
@@ -1253,7 +1253,7 @@ class TestBilibiliChannel:
         ch = BilibiliChannel()
         status, msg = ch.check()
         assert status == "error"
-        assert "uv tool install --force bilibili-cli" in msg
+        assert "uv tool install --force 'bilibili-cli==0.6.2'" in msg
         assert ch.active_backend is None
 
     def test_unverified_opencli_falls_back_to_verified_api(self, monkeypatch):
@@ -1317,7 +1317,7 @@ class TestYouTubeChannel:
         status, msg = ch.check()
         assert status == "error"
         assert "无法执行" in msg
-        assert "uv tool install --force yt-dlp" in msg
+        assert "uv tool install --force 'yt-dlp[default]==2026.8.19'" in msg
         assert ch.active_backend is None
 
 
@@ -1461,10 +1461,11 @@ class TestLinkedInChannel:
         assert status == "off"
         assert channel.backends[0] == "mcp-server-linkedin"
         assert "docs.astral.sh/uv/getting-started/installation" in message
-        assert "uvx mcp-server-linkedin@latest --login" in message
+        assert "uvx mcp-server-linkedin@4.24.3 --login" in message
+        assert "@latest" not in message
         assert (
             "mcporter config add linkedin --command uvx "
-            "--arg mcp-server-linkedin@latest --env UV_HTTP_TIMEOUT=300 "
+            "--arg mcp-server-linkedin@4.24.3 --env UV_HTTP_TIMEOUT=300 "
             "--scope home"
         ) in message
         assert "pip install linkedin-scraper-mcp" not in message
@@ -1482,7 +1483,7 @@ class TestLinkedInChannel:
                     "mcpServers": {
                         "linkedin": {
                             "command": "uvx",
-                            "args": ["mcp-server-linkedin@latest"],
+                            "args": ["mcp-server-linkedin@4.24.3"],
                         }
                     },
                     "imports": [],

@@ -39,8 +39,8 @@ def reinstall_hint(package: str) -> str:
     """Prescription for a broken (stale-venv) CLI install."""
     return (
         f"命令存在但无法执行——通常是系统 Python 升级后 venv 解释器丢失。重装即可修复：\n"
-        f"  uv tool install --force {package}\n"
-        f"或：pipx reinstall {package}"
+        f"  uv tool install --force '{package}'\n"
+        f"或：pipx install --force '{package}'"
     )
 
 

@@ -12,6 +12,7 @@ YouTube backend; it just no longer serves bilibili.
 import json
 import urllib.request
 
+from agent_reach.pins import BILIBILI_CLI_SPEC
 from agent_reach.probe import probe_command
 
 from .base import Channel
@@ -75,13 +76,13 @@ class BilibiliChannel(Channel):
 
         return "off", (
             "没有可用的 B站后端（搜索 API 也不可达，可能是网络问题）。推荐：\n"
-            "  pipx install bilibili-cli（搜索/热门/视频详情，无需登录）\n"
+            f"  pipx install '{BILIBILI_CLI_SPEC}'（搜索/热门/视频详情，无需登录）\n"
             "  或桌面装 OpenCLI（额外解锁字幕）：agent-reach install --system --channels opencli"
         )
 
     def _check_bili_cli(self):
         """bili-cli candidate. None = not installed."""
-        probe = probe_command("bili", ["--version"], timeout=10, package="bilibili-cli")
+        probe = probe_command("bili", ["--version"], timeout=10, package=BILIBILI_CLI_SPEC)
         if probe.status == "missing":
             return None
         if probe.status == "broken":
@@ -115,5 +116,5 @@ class BilibiliChannel(Channel):
             return None
         return "ok", (
             "B站搜索 API 可达（仅搜索，curl 直连）。"
-            "完整功能建议安装 bili-cli：pipx install bilibili-cli"
+            f"完整功能建议安装 bili-cli：pipx install '{BILIBILI_CLI_SPEC}'"
         )

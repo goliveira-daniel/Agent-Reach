@@ -4,6 +4,7 @@
 import re
 import shutil
 
+from agent_reach.pins import YTDLP_SPEC
 from agent_reach.probe import probe_command
 from agent_reach.utils.paths import (
     PrivatePathError,
@@ -15,7 +16,7 @@ from agent_reach.utils.paths import (
 from .base import Channel
 
 _JS_RUNTIMES_SUPPORTED_FROM = (2025, 11, 12)
-_YTDLP_UPGRADE_COMMAND = 'python -m pip install -U "yt-dlp[default]"'
+_YTDLP_UPGRADE_COMMAND = f'python -m pip install "{YTDLP_SPEC}"'
 
 
 def _parse_ytdlp_version(version: str):
@@ -49,7 +50,7 @@ class YouTubeChannel(Channel):
 
     def check(self, config=None):
         # 真跑 yt-dlp --version 探活，区分未装 / venv 断链 / 跑不动
-        probe = probe_command("yt-dlp", ["--version"], timeout=10, package="yt-dlp")
+        probe = probe_command("yt-dlp", ["--version"], timeout=10, package=YTDLP_SPEC)
         if probe.status == "missing":
             self.active_backend = None
             return "off", f"yt-dlp 未安装。安装：{_YTDLP_UPGRADE_COMMAND}"

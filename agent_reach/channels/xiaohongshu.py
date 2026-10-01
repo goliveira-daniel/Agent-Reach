@@ -16,6 +16,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from agent_reach.pins import MCPORTER_SPEC
 from agent_reach.utils.paths import (
     PrivatePathError,
     read_small_text_no_follow,
@@ -230,7 +231,7 @@ class XiaoHongShuChannel(Channel):
         if not shutil.which("mcporter"):
             return "warn", (
                 "xiaohongshu-mcp 服务可达，但 mcporter 未安装，Doctor 未接入"
-                "该服务。先安装：npm install -g mcporter"
+                f"该服务。先安装：npm install -g {MCPORTER_SPEC}"
             )
         try:
             inspection = inspect_mcporter_config()

@@ -23,9 +23,11 @@ import os
 import urllib.request
 from dataclasses import dataclass
 
+from agent_reach.pins import OPENCLI_SPEC as _PINNED_OPENCLI_SPEC
 from agent_reach.probe import probe_command
 
 OPENCLI_PACKAGE = "@jackwener/opencli"
+OPENCLI_SPEC = _PINNED_OPENCLI_SPEC
 OPENCLI_EXTENSION_ID = "ildkmabpimmkaediidaifkhjpohdnifk"
 OPENCLI_EXTENSION_URL = (
     f"https://chromewebstore.google.com/detail/opencli/{OPENCLI_EXTENSION_ID}"
@@ -142,7 +144,7 @@ def opencli_status(timeout: int = 10) -> OpenCLIStatus:
             broken=True,
             hint=(
                 "opencli 命令存在但无法执行（node 环境损坏），重装：\n"
-                f"  npm install -g {OPENCLI_PACKAGE}"
+                f"  npm install -g {OPENCLI_SPEC}"
             ),
         )
 

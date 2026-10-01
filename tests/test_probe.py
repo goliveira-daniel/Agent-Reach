@@ -32,8 +32,8 @@ def test_broken_shebang_detected_as_broken(tmp_path, monkeypatch):
 
     r = probe_command("stale-tool", package="stale-tool-pkg")
     assert r.status == "broken"
-    assert "uv tool install --force stale-tool-pkg" in r.hint
-    assert "pipx reinstall stale-tool-pkg" in r.hint
+    assert "uv tool install --force 'stale-tool-pkg'" in r.hint
+    assert "pipx install --force 'stale-tool-pkg'" in r.hint
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="shell script fixture is POSIX-only")
@@ -111,5 +111,5 @@ def test_retries_help_transient_failures(tmp_path, monkeypatch):
 
 def test_reinstall_hint_mentions_both_installers():
     hint = reinstall_hint("some-pkg")
-    assert "uv tool install --force some-pkg" in hint
-    assert "pipx reinstall some-pkg" in hint
+    assert "uv tool install --force 'some-pkg'" in hint
+    assert "pipx install --force 'some-pkg'" in hint

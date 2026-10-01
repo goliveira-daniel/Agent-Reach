@@ -16,6 +16,15 @@ import sys
 import time
 
 from agent_reach import __version__
+from agent_reach.pins import (
+    BILIBILI_CLI_SPEC,
+    FORK_SOURCE,
+    MCPORTER_SPEC,
+    OPENCLI_SPEC,
+    TWITTER_CLI_SPEC,
+    UNDICI_SPEC,
+    YTDLP_SPEC,
+)
 
 # Pinned to the 0.4.2 state — PyPI still only has 0.4.1 (upstream issue #10).
 _RDT_GIT_SOURCE = "git+https://github.com/public-clis/rdt-cli.git@5e4fb3720d5c174e976cd425ccc3b879d52cac66"
@@ -801,7 +810,7 @@ def _install_system_deps():
             else:
                 try:
                     result = subprocess.run(
-                        [npm_cmd, "install", "-g", "undici"],
+                        [npm_cmd, "install", "-g", UNDICI_SPEC],
                         capture_output=True,
                         encoding="utf-8",
                         errors="replace",
@@ -859,8 +868,8 @@ def _install_system_deps():
         ):
             print(
                 "  -- 未写入 yt-dlp JS runtime 配置：yt-dlp 缺失、过旧或"
-                "版本无法确认。先升级：python -m pip install -U "
-                '"yt-dlp[default]"'
+                "版本无法确认。先安装钉定版本：python -m pip install "
+                f'"{YTDLP_SPEC}"'
             )
         else:
             ytdlp_config = get_ytdlp_config_path()
@@ -965,8 +974,8 @@ def _install_twitter_deps():
         print("  ✅ twitter-cli already installed")
         return True
     for tool, args in [
-        ("pipx", ["install", "twitter-cli"]),
-        ("uv", ["tool", "install", "twitter-cli"]),
+        ("pipx", ["install", TWITTER_CLI_SPEC]),
+        ("uv", ["tool", "install", TWITTER_CLI_SPEC]),
     ]:
         tool_cmd = shutil.which(tool)
         if tool_cmd:
@@ -980,7 +989,7 @@ def _install_twitter_deps():
                     return True
             except (OSError, subprocess.TimeoutExpired):
                 pass
-    print("  [!]  twitter-cli install failed. Run: pipx install twitter-cli")
+    print(f"  [!]  twitter-cli install failed. Run: pipx install '{TWITTER_CLI_SPEC}'")
     return False
 
 
@@ -1065,7 +1074,6 @@ def _install_opencli_deps():
 
     from agent_reach.backends import (
         OPENCLI_EXTENSION_URL,
-        OPENCLI_PACKAGE,
         opencli_status,
         opencli_summary,
     )
@@ -1086,7 +1094,7 @@ def _install_opencli_deps():
 
     try:
         install_result = subprocess.run(
-            [npm_cmd, "install", "-g", OPENCLI_PACKAGE],
+            [npm_cmd, "install", "-g", OPENCLI_SPEC],
             capture_output=True, encoding="utf-8", errors="replace", timeout=300,
         )
     except (OSError, subprocess.TimeoutExpired):
@@ -1106,7 +1114,7 @@ def _install_opencli_deps():
         print("    3. 运行 `opencli doctor` 验证连接")
         return True
     else:
-        print(f"  [!]  OpenCLI install failed. Run: npm install -g {OPENCLI_PACKAGE}")
+        print(f"  [!]  OpenCLI install failed. Run: npm install -g {OPENCLI_SPEC}")
         return False
 
 
@@ -1166,8 +1174,8 @@ def _install_bili_deps():
         print("  ✅ bili-cli already installed")
         return True
     for tool, args in [
-        ("pipx", ["install", "bilibili-cli"]),
-        ("uv", ["tool", "install", "bilibili-cli"]),
+        ("pipx", ["install", BILIBILI_CLI_SPEC]),
+        ("uv", ["tool", "install", BILIBILI_CLI_SPEC]),
     ]:
         tool_cmd = shutil.which(tool)
         if tool_cmd:
@@ -1181,7 +1189,7 @@ def _install_bili_deps():
                     return True
             except (OSError, subprocess.TimeoutExpired):
                 pass
-    print("  [!]  bili-cli install failed. Run: pipx install bilibili-cli")
+    print(f"  [!]  bili-cli install failed. Run: pipx install '{BILIBILI_CLI_SPEC}'")
     return False
 
 
@@ -1260,7 +1268,7 @@ def _install_mcporter():
         return False
     try:
         install_result = subprocess.run(
-            [npm_cmd, "install", "-g", "mcporter"],
+            [npm_cmd, "install", "-g", MCPORTER_SPEC],
             capture_output=True, encoding="utf-8", errors="replace", timeout=120,
         )
     except (OSError, subprocess.TimeoutExpired) as e:
@@ -1269,7 +1277,7 @@ def _install_mcporter():
     if install_result.returncode == 0 and shutil.which("mcporter"):
         print("  ✅ mcporter installed")
         return True
-    print("  [X] mcporter install failed. Retry: npm install -g mcporter")
+    print(f"  [X] mcporter install failed. Retry: npm install -g {MCPORTER_SPEC}")
     return False
 
 
@@ -1283,7 +1291,7 @@ def _install_mcporter_safe():
         print("  ✅ mcporter already installed")
     else:
         print("  -- mcporter not installed")
-        print("  To install: npm install -g mcporter")
+        print(f"  To install: npm install -g {MCPORTER_SPEC}")
 
 
 def _detect_environment():
@@ -1494,7 +1502,7 @@ def _cmd_configure(args):
             )
             if not shutil.which("twitter"):
                 print(
-                    "  [!] twitter-cli 未安装。运行：pipx install twitter-cli"
+                    f"  [!] twitter-cli 未安装。运行：pipx install '{TWITTER_CLI_SPEC}'"
                 )
             else:
                 print(
@@ -2133,13 +2141,12 @@ def _github_get_with_retry(url, timeout=10, retries=3, sleeper=time.sleep):
     return None, "unknown", retries
 
 
-#: Full update = package + upstream tools + skill. The one-liner walks an
-#: agent through all three (docs/update.md); bare pip only updates the package.
+#: This fork is pinned: updates are a manual review, never an install from a
+#: moving branch or a remotely fetched instruction file.
 _UPDATE_INSTRUCTIONS = (
-    "更新方式（推荐，复制这句话给你的 AI Agent，会完整更新本体+上游工具+skill）：\n"
-    "  帮我更新 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md\n"
-    "仅更新本体（不含上游工具和 skill）：\n"
-    "  pip install --upgrade https://github.com/Panniantong/agent-reach/archive/main.zip"
+    "此 fork 已钉定版本，不会自动更新。更新流程见 fork 仓库内的 docs/update.md：\n"
+    "  审阅上游变更 → 合并进 fork → 打新 tag → 修改 agent_reach/pins.py → 按新 tag 重装\n"
+    f"  pipx install --force '{FORK_SOURCE}'  （仅重装当前钉定版本）"
 )
 
 
@@ -2285,8 +2292,7 @@ def _cmd_watch():
         if release_body:
             for line in release_body.strip().split("\n")[:10]:
                 print(f"    {line}")
-        print("  更新（一句话发给 Agent 即可完整更新）：")
-        print("    帮我更新 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md")
+        print(_UPDATE_INSTRUCTIONS)
 
 
 if __name__ == "__main__":

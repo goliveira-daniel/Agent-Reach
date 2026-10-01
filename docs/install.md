@@ -2,17 +2,31 @@
 
 ## For Humans
 
-Copy this to your AI Agent:
+This is the hardened fork (https://github.com/goliveira-daniel/agent-reach),
+pinned to tag `v1.5.0-hardened.1`. Do not point an agent at a remote copy of
+this guide; read it from your local checkout of the fork.
 
-```
-帮我安装 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
-```
-
-> 🛡️ **Safe by default:** `agent-reach install` only checks the machine and lists missing dependencies:
-> ```
-> 帮我安全检查并安装 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
-> ```
+> 🛡️ **Safe by default:** `agent-reach install` only checks the machine and lists missing dependencies.
 > Only use `--system` after the user explicitly approves system-level installs and configuration writes.
+
+### Pinned versions
+
+Every external tool is installed at an exact version (source of truth:
+`agent_reach/pins.py`). Change a pin only after reviewing the new release.
+
+| Tool | Installer | Pin |
+|------|-----------|-----|
+| agent-reach (this fork) | pipx | `git+https://github.com/goliveira-daniel/agent-reach.git@v1.5.0-hardened.1` |
+| Python deps of agent-reach | pip constraints | `constraints.txt` (yt-dlp `2026.8.19`) |
+| mcporter | npm -g | `mcporter@0.13.13` |
+| OpenCLI | npm -g | `@jackwener/opencli@1.8.7` |
+| undici | npm -g | `undici@8.10.2` |
+| twitter-cli | pipx / uv tool | `twitter-cli==0.8.5` |
+| bili-cli | pipx / uv tool | `bilibili-cli==0.6.2` |
+| yt-dlp (standalone upgrade) | pip / pipx | `yt-dlp[default]==2026.8.19` |
+| LinkedIn MCP | uvx | `mcp-server-linkedin@4.24.3` |
+| rdt-cli | pipx | `git+https://github.com/public-clis/rdt-cli.git@5e4fb3720d5c174e976cd425ccc3b879d52cac66` |
+| boss-agent-cli | pipx / uv tool | `git+https://github.com/can4hou6joeng4/boss-agent-cli.git@4c991b77086a203173bf08a4cb64a23af6514fe6` |
 
 ---
 
@@ -42,15 +56,17 @@ All Agent Reach files go in dedicated directories — **never in the agent works
 | Config & tokens | `~/.agent-reach/` | `~/.agent-reach/config.json` |
 | Upstream tool repos | `~/.agent-reach/tools/` | `~/.agent-reach/tools/xiaoyuzhou/` |
 | Temporary files | `/tmp/` | `/tmp/yt-dlp-output/` |
-| Skills | `~/.openclaw/skills/agent-reach/` | SKILL.md |
+| Skills | `~/.claude/skills/agent-reach/` | SKILL.md (other roots only via `agent-reach skill --install --target DIR`) |
 
 **Why?** If you clone repos or create files in the workspace, it pollutes the user's project directory and can break their agent over time. Keep the workspace clean.
 
 ### Step 1: Install the basics
 
 ```bash
-# 推荐：pipx（最省心）
-pipx install https://github.com/Panniantong/agent-reach/archive/main.zip
+# 推荐：pipx，从本地 fork checkout（已核对 tag）安装，依赖按 constraints.txt 钉定
+git clone https://github.com/goliveira-daniel/agent-reach.git ~/src/agent-reach
+git -C ~/src/agent-reach checkout v1.5.0-hardened.1
+pipx install ~/src/agent-reach --pip-args="-c $HOME/src/agent-reach/constraints.txt"
 agent-reach install --env=auto               # Read-only check (default)
 # After the user explicitly approves system changes:
 agent-reach install --env=auto --system
@@ -59,7 +75,7 @@ agent-reach install --env=auto --system
 # 用虚拟环境安装：
 python3 -m venv ~/.agent-reach-venv
 source ~/.agent-reach-venv/bin/activate
-pip install https://github.com/Panniantong/agent-reach/archive/main.zip
+pip install -c ~/src/agent-reach/constraints.txt ~/src/agent-reach
 agent-reach install --env=auto               # Read-only check (default)
 # After the user explicitly approves system changes:
 agent-reach install --env=auto --system
@@ -74,13 +90,20 @@ agent-reach install --env=auto --system
 > ```powershell
 > py -3 -m venv $env:USERPROFILE\.agent-reach-venv
 > $env:USERPROFILE\.agent-reach-venv\Scripts\Activate.ps1
-> python -m pip install https://github.com/Panniantong/agent-reach/archive/main.zip
+> python -m pip install -c $env:USERPROFILE\src\agent-reach\constraints.txt $env:USERPROFILE\src\agent-reach
 > agent-reach install --env=auto
 > ```
 
-The default command checks core infrastructure (gh CLI, Node.js, mcporter, Exa search, yt-dlp config) without changing the host. With explicit `--system` approval it installs/configures the missing pieces and activates these zero-config channels:
+The default command checks core infrastructure (gh CLI, Node.js, mcporter, yt-dlp config) without changing the host. With explicit `--system` approval it installs the missing pieces at the pinned versions and activates these zero-config channels:
 
-- Web (Jina Reader), YouTube, GitHub, RSS, Exa Search, V2EX, Bilibili (basic)
+- YouTube, GitHub, RSS, V2EX, Bilibili (basic)
+
+Web search and generic page reading use the agent's built-in WebSearch /
+WebFetch tools; this fork does not configure Exa or Jina Reader.
+
+Finally it installs the skill into `~/.claude/skills/agent-reach` only. An
+existing folder there is preserved; `agent-reach skill --install --force`
+replaces it after moving the old one to `agent-reach.bak-<timestamp>`.
 
 > 💡 **macOS / Homebrew Python 提示 `externally-managed-environment`？**
 > 这是 PEP 668 保护，不是 Agent Reach 本身的问题。优先用 `pipx install ...`，或先创建 `venv` 再安装。
@@ -102,7 +125,7 @@ After installing the basics, **ask the user** which additional channels they nee
 >
 > 还有这些可选渠道，你需要哪些？
 >
-> - 🌟 **OpenCLI**（桌面推荐）— 一次安装即可提供 Reddit/Facebook/Instagram/B站字幕/Twitter 备选，并作为小红书桌面后端；小红书只使用用户已有且明确控制的 Chrome 会话
+> - 🌟 **OpenCLI**（桌面推荐）— 一次安装即可提供 Reddit/Facebook/Instagram/B站字幕/Twitter 备选，并作为小红书桌面后端；建议装在**专用 Chrome profile**（不是日常 profile），只在该 profile 里登录需要的平台
 > - 🐦 **Twitter/X** — 搜推文、看时间线（需要登录 Cookie）
 > - 📈 **雪球** — 股票行情、热门帖子（需要登录 Cookie）
 > - 🎙️ **小宇宙播客** — 音频转文字（需要免费 Groq Key）
@@ -216,8 +239,12 @@ rdt login   # 自动提取浏览器 Cookie；服务器无浏览器时按 doctor 
 agent-reach install --system --channels opencli
 ```
 
+> OpenCLI 会使用安装了扩展的 Chrome profile 里的全部登录态。建议先新建一个
+> **专用 Chrome profile**（Chrome 右上角头像 → 添加），只在其中登录 Agent 需要读取的
+> 平台；不要把扩展装进日常使用的 profile。
+>
 > 装完后引导用户做唯一一步手动操作（Chrome 安全限制，无法代劳）：
-> 1. 打开 https://chromewebstore.google.com/detail/opencli/ildkmabpimmkaediidaifkhjpohdnifk
+> 1. 在专用 profile 中打开 https://chromewebstore.google.com/detail/opencli/ildkmabpimmkaediidaifkhjpohdnifk
 > 2. 点「添加至 Chrome」
 > 3. 运行 `opencli doctor` 验证（显示 Extension: connected 即成功）
 >
@@ -296,21 +323,21 @@ agent-reach configure groq-key
 > - 2 小时以上的播客建议分批处理
 
 **LinkedIn (可选 — mcp-server-linkedin):**
-> "LinkedIn 基本内容可通过 Jina Reader 读取。完整功能（Profile 详情、人才与职位搜索）需要 mcp-server-linkedin。"
+> "LinkedIn 公开页面可用 Agent 内置 WebFetch 读取。完整功能（Profile 详情、人才与职位搜索）需要 mcp-server-linkedin。"
 
 > **配置方式（推荐 stdio）：**
 > 先按官方说明安装 `uv`（会同时提供 `uvx`）：
 > https://docs.astral.sh/uv/getting-started/installation/
 >
 > ```bash
-> mcporter config add linkedin --command uvx --arg mcp-server-linkedin@latest --env UV_HTTP_TIMEOUT=300 --scope home
+> mcporter config add linkedin --command uvx --arg mcp-server-linkedin@4.24.3 --env UV_HTTP_TIMEOUT=300 --scope home
 > ```
 >
-> `uvx` 会按需获取并启动最新版服务，无需另装 Python 包或常驻 HTTP 服务。
+> `uvx` 会按需获取并启动钉定版本的服务，无需另装 Python 包或常驻 HTTP 服务。
 >
 > **首次登录（需要浏览器界面）：**
 > ```bash
-> uvx mcp-server-linkedin@latest --login
+> uvx mcp-server-linkedin@4.24.3 --login
 > ```
 > 浏览器弹出后手动登录 LinkedIn；登录态会保存到 `~/.linkedin-mcp/profile/`。无桌面的服务器需在 VNC 等可见桌面中运行同一条登录命令。
 >
@@ -378,7 +405,7 @@ If the user agrees, create a **cron job** (daily, `sessionTarget: "isolated"`, `
 运行 agent-reach watch 命令。
 如果输出包含"全部正常"，不需要通知用户，静默结束。
 如果输出包含问题（❌ ⚠️）或新版本（🆕），把完整报告发给用户，并建议修复方案。
-如果有新版本可用，问用户是否要升级（把这句话发给用户的 Agent 即可完整更新：帮我更新 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md）。
+如果有新版本可用，只告知用户；升级需要用户按 fork 内 docs/update.md 手动审阅并更新钉定版本，不要自动升级。
 ```
 
 If the user wants a different agent to handle it, let them choose.
@@ -414,8 +441,7 @@ After installation, use upstream tools directly. See SKILL.md for the full comma
 | Facebook | `opencli` | `opencli facebook search "query" -f yaml` |
 | Instagram | `opencli` | `opencli instagram user nasa -f yaml` |
 | GitHub | `gh` | `gh search repos "query"` |
-| Web | `curl` + Jina | `curl -s "https://r.jina.ai/URL"` |
-| Exa Search | `mcporter` | `mcporter call exa.web_search_exa query="..." numResults=5` |
+| Web 阅读 / 搜索 | Agent 内置 WebFetch / WebSearch | — |
 | 小红书 | `opencli`（服务器 `mcporter`） | `opencli xiaohongshu search "query" -f yaml` |
 | 小宇宙播客 | `transcribe.sh` | `bash ~/.agent-reach/tools/xiaoyuzhou/transcribe.sh <URL>` |
 | LinkedIn | `mcporter` | `mcporter call linkedin.get_person_profile linkedin_username="..."` |

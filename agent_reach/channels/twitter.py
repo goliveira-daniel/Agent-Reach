@@ -4,6 +4,7 @@
 import os
 import shutil
 
+from agent_reach.pins import TWITTER_CLI_SPEC
 from agent_reach.utils.url import host_matches
 
 from .base import Channel
@@ -75,9 +76,9 @@ class TwitterChannel(Channel):
 
         return "warn", (
             "Twitter CLI 未安装。安装方式：\n"
-            "  pipx install twitter-cli\n"
+            f"  pipx install '{TWITTER_CLI_SPEC}'\n"
             "或：\n"
-            "  uv tool install twitter-cli"
+            f"  uv tool install '{TWITTER_CLI_SPEC}'"
         )
 
     def _check_twitter_cli(self, config=None):

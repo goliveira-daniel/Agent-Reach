@@ -14,6 +14,7 @@ import sys
 
 from agent_reach.config import Config
 from agent_reach.core import AgentReach
+from agent_reach.pins import FORK_SOURCE
 from agent_reach.utils.text import scrub_url_credentials
 
 try:
@@ -30,8 +31,7 @@ def create_server():
     if not HAS_MCP:
         print(
             "MCP not installed. Install: python -m pip install "
-            "'agent-reach[mcp] @ "
-            "https://github.com/Panniantong/agent-reach/archive/main.zip'",
+            f"'agent-reach[mcp] @ {FORK_SOURCE}'",
             file=sys.stderr,
         )
         sys.exit(1)

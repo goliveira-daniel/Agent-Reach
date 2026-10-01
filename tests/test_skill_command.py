@@ -95,15 +95,16 @@ class TestSkillCommand(unittest.TestCase):
         )[1].split("### Step 4:", maxsplit=1)[0]
 
         self.assertIn(
-            "uvx mcp-server-linkedin@latest --login",
+            "uvx mcp-server-linkedin@4.24.3 --login",
             linkedin_section,
         )
         self.assertIn(
             "mcporter config add linkedin --command uvx "
-            "--arg mcp-server-linkedin@latest --env UV_HTTP_TIMEOUT=300 "
+            "--arg mcp-server-linkedin@4.24.3 --env UV_HTTP_TIMEOUT=300 "
             "--scope home",
             linkedin_section,
         )
+        self.assertNotIn("@latest", linkedin_section)
         self.assertNotIn("linkedin-scraper-mcp", linkedin_section)
         self.assertNotIn("localhost:3000/mcp", linkedin_section)
         self.assertNotIn("linkedin-scraper.", linkedin_section)

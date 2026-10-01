@@ -1050,7 +1050,7 @@ def test_update_guide_preserves_ytdlp_default_extra():
     )
 
     assert update_line.count("yt-dlp[default]") == 3
-    assert "pipx install --force 'yt-dlp[default]'" in update_line
+    assert "pipx install --force 'yt-dlp[default]==2026.8.19'" in update_line
 
 
 def test_mcporter_install_never_configures_exa(monkeypatch):
@@ -1093,7 +1093,7 @@ def test_mcporter_install_uses_resolved_windows_command_paths(monkeypatch):
 
     def fake_run(args, **_kwargs):
         calls.append(args)
-        if args[:4] == [npm_cmd, "install", "-g", "mcporter"]:
+        if args[:4] == [npm_cmd, "install", "-g", "mcporter@0.13.13"]:
             state["installed"] = True
             return _docker_result(args)
         return _docker_result(args, returncode=1)
@@ -1102,7 +1102,7 @@ def test_mcporter_install_uses_resolved_windows_command_paths(monkeypatch):
     monkeypatch.setattr(subprocess, "run", fake_run)
 
     assert cli._install_mcporter() is True
-    assert calls == [[npm_cmd, "install", "-g", "mcporter"]]
+    assert calls == [[npm_cmd, "install", "-g", "mcporter@0.13.13"]]
     assert not any("exa" in " ".join(call) for call in calls)
 
 
