@@ -38,8 +38,8 @@ class TestCLI:
                     "name": "网页",
                     "message": "可用",
                     "tier": 0,
-                    "backends": ["Jina Reader"],
-                    "active_backend": "Jina Reader",
+                    "backends": ["Built-in WebFetch"],
+                    "active_backend": "Built-in WebFetch",
                 }
             },
         ), patch(
@@ -492,7 +492,7 @@ class TestWatchVersionCompare:
         monkeypatch.setattr(
             "agent_reach.doctor.check_all",
             lambda config: {"web": {"status": "ok", "name": "任意网页", "message": "ok",
-                            "tier": 0, "backends": ["Jina Reader"], "active_backend": "Jina Reader"}},
+                            "tier": 0, "backends": ["Built-in WebFetch"], "active_backend": "Built-in WebFetch"}},
         )
         cli._cmd_watch()
         out = capsys.readouterr().out

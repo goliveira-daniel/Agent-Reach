@@ -23,7 +23,7 @@ _CONFIG_COMMAND = (
 class LinkedInChannel(Channel):
     name = "linkedin"
     description = "LinkedIn 职业社交"
-    backends = ["mcp-server-linkedin", "Jina Reader"]
+    backends = ["mcp-server-linkedin"]
     tier = 2
 
     def can_handle(self, url: str) -> bool:
@@ -35,7 +35,7 @@ class LinkedInChannel(Channel):
         self.active_backend = None
         if not shutil.which("mcporter"):
             return "off", (
-                "基本内容可通过 Jina Reader 读取。完整功能需要：\n"
+                "公开页面可用 Claude Code 内置 WebFetch 读取。完整功能需要：\n"
                 f"  先安装 uv/uvx：{_UV_INSTALL_URL}\n"
                 f"  {_LOGIN_COMMAND}\n"
                 f"  {_CONFIG_COMMAND}\n"

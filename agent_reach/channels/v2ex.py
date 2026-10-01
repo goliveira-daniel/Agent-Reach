@@ -327,10 +327,9 @@ class V2EXChannel(Channel):
         """搜索帖子。
 
         注意：V2EX 公开 API 暂不支持全文搜索端点（/api/search.json 不可用）。
-        本方法通过 Jina Reader 代理 V2EX 站内搜索页面获取结果（纯文本，无结构化数据）。
+        本方法不发起请求，只返回替代方案。
 
-        如需精确搜索，建议直接访问 https://www.v2ex.com/?q=<query> 或
-        使用 Exa channel 的 site:v2ex.com 搜索。
+        如需搜索，使用 Claude Code 内置 WebSearch（site:v2ex.com）。
 
         Returns:
             list of dicts with keys: title, url, snippet
@@ -342,7 +341,7 @@ class V2EXChannel(Channel):
                 "error": (
                     "V2EX 公开 API 不提供搜索端点。"
                     f"建议改用：{search_url} "
-                    "或通过 Exa channel 使用 site:v2ex.com 搜索。"
+                    "或用 Claude Code 内置 WebSearch 搜索 site:v2ex.com。"
                 )
             }
         ]

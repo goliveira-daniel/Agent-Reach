@@ -62,23 +62,24 @@ class TestConfig:
         assert tmp_config.get("to_delete") is None
 
     def test_is_configured(self, tmp_config):
-        assert not tmp_config.is_configured("exa_search")
-        tmp_config.set("exa_api_key", "test-key")
-        assert tmp_config.is_configured("exa_search")
+        assert not tmp_config.is_configured("groq_whisper")
+        tmp_config.set("groq_api_key", "test-key")
+        assert tmp_config.is_configured("groq_whisper")
 
     def test_get_configured_features(self, tmp_config):
         features = tmp_config.get_configured_features()
         assert isinstance(features, dict)
-        assert "exa_search" in features
+        assert "groq_whisper" in features
+        assert "exa_search" not in features
         assert all(v is False for v in features.values())
 
     def test_to_dict_redacts_long_secret_without_leaking_prefix(self, tmp_config):
         secret = "super-secret-key-12345"
-        tmp_config.set("exa_api_key", secret)
+        tmp_config.set("groq_api_key", secret)
         tmp_config.set("normal_setting", "visible")
         masked = tmp_config.to_dict()
 
-        assert masked["exa_api_key"] == "[REDACTED]"
+        assert masked["groq_api_key"] == "[REDACTED]"
         assert secret not in str(masked)
         assert masked["normal_setting"] == "visible"
 

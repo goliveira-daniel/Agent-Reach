@@ -1053,8 +1053,8 @@ def test_update_guide_preserves_ytdlp_default_extra():
     assert "pipx install --force 'yt-dlp[default]'" in update_line
 
 
-def test_mcporter_install_adds_exa_to_home_scope(monkeypatch):
-    """Installer config remains available across working directories."""
+def test_mcporter_install_never_configures_exa(monkeypatch):
+    """Web search uses built-in WebSearch; the installer adds no MCP servers."""
     import shutil
 
     calls = []
@@ -1067,69 +1067,12 @@ def test_mcporter_install_adds_exa_to_home_scope(monkeypatch):
 
     def fake_run(args, **_kwargs):
         calls.append(args)
-        if args == ["/usr/bin/mcporter", "config", "list", "--json"]:
-            return _docker_result(args, stdout='{"servers": []}')
         return _docker_result(args)
 
     monkeypatch.setattr(subprocess, "run", fake_run)
 
-    cli._install_mcporter()
-
-    assert [
-        "/usr/bin/mcporter",
-        "config",
-        "add",
-        "exa",
-        "https://mcp.exa.ai/mcp",
-        "--scope",
-        "home",
-    ] in calls
-    assert ["/usr/bin/mcporter", "config", "list", "--json"] in calls
-
-
-def test_mcporter_install_does_not_treat_metadata_as_exa_server(
-    monkeypatch,
-):
-    """Only a server object's exact name may suppress Exa setup."""
-    import json
-    import shutil
-
-    calls = []
-    payload = {
-        "servers": [
-            {
-                "name": "unrelated",
-                "source": {"path": "/tmp/exa-project/mcporter.json"},
-                "url": "https://example.test/?note=exa",
-            }
-        ]
-    }
-
-    monkeypatch.setattr(
-        shutil,
-        "which",
-        lambda name: "/usr/bin/mcporter" if name == "mcporter" else None,
-    )
-
-    def fake_run(args, **_kwargs):
-        calls.append(args)
-        if args == ["/usr/bin/mcporter", "config", "list", "--json"]:
-            return _docker_result(args, stdout=json.dumps(payload))
-        return _docker_result(args)
-
-    monkeypatch.setattr(subprocess, "run", fake_run)
-
-    cli._install_mcporter()
-
-    assert [
-        "/usr/bin/mcporter",
-        "config",
-        "add",
-        "exa",
-        "https://mcp.exa.ai/mcp",
-        "--scope",
-        "home",
-    ] in calls
+    assert cli._install_mcporter() is True
+    assert calls == []
 
 
 def test_mcporter_install_uses_resolved_windows_command_paths(monkeypatch):
@@ -1153,21 +1096,14 @@ def test_mcporter_install_uses_resolved_windows_command_paths(monkeypatch):
         if args[:4] == [npm_cmd, "install", "-g", "mcporter"]:
             state["installed"] = True
             return _docker_result(args)
-        if args == [mcporter_cmd, "config", "list", "--json"]:
-            return _docker_result(
-                args,
-                stdout='{"servers": [{"name": "exa"}]}',
-            )
         return _docker_result(args, returncode=1)
 
     monkeypatch.setattr(shutil, "which", fake_which)
     monkeypatch.setattr(subprocess, "run", fake_run)
 
     assert cli._install_mcporter() is True
-    assert calls == [
-        [npm_cmd, "install", "-g", "mcporter"],
-        [mcporter_cmd, "config", "list", "--json"],
-    ]
+    assert calls == [[npm_cmd, "install", "-g", "mcporter"]]
+    assert not any("exa" in " ".join(call) for call in calls)
 
 
 def test_server_xhs_install_never_recommends_qr_or_browser_extraction(

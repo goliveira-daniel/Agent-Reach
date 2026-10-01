@@ -9,7 +9,6 @@ from typing import List, Optional
 from .base import Channel
 from .bilibili import BilibiliChannel
 from .boss import BossChannel
-from .exa_search import ExaSearchChannel
 from .facebook import FacebookChannel
 from .github import GitHubChannel
 from .instagram import InstagramChannel
@@ -39,7 +38,6 @@ ALL_CHANNELS: List[Channel] = [
     V2EXChannel(),
     XueqiuChannel(),
     RSSChannel(),
-    ExaSearchChannel(),
     WebChannel(),
 ]
 

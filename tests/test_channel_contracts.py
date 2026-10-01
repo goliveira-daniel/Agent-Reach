@@ -176,7 +176,6 @@ def test_channel_can_handle_contract():
         "linkedin": "https://www.linkedin.com/in/test",
         "rss": "https://example.com/feed.xml",
         "xueqiu": "https://xueqiu.com/S/SH600519",
-        "exa_search": "https://example.com",
         "web": "https://example.com",
     }
     for ch in get_all_channels():

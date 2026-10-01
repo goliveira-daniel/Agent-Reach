@@ -366,10 +366,10 @@ def _cmd_install(args):
     else:
         core_install_ok = _install_system_deps() is not False
 
-    # ── mcporter (for Exa search) ──
+    # ── mcporter (MCP bridge for LinkedIn / xiaohongshu-mcp) ──
     print()
     if dry_run:
-        print("[dry-run] Would install mcporter and configure Exa search")
+        print("[dry-run] Would install mcporter")
     elif safe_mode:
         _install_mcporter_safe()
     else:
@@ -1239,83 +1239,38 @@ def _install_system_deps_dryrun():
 
 
 def _install_mcporter():
-    """Install mcporter and configure Exa search."""
+    """Install mcporter (MCP bridge used by LinkedIn and xiaohongshu-mcp).
+
+    No MCP servers are configured here; web search uses the agent's built-in
+    WebSearch tool instead of Exa.
+    """
     import shutil
     import subprocess
 
-    print("Setting up mcporter (search backend)...")
+    print("Setting up mcporter (MCP bridge)...")
 
-    mcporter_cmd = shutil.which("mcporter")
-    if mcporter_cmd:
+    if shutil.which("mcporter"):
         print("  ✅ mcporter already installed")
-    else:
-        npm_cmd = shutil.which("npm")
-        if not npm_cmd:
-            print("  [!]  mcporter requires Node.js. Install Node.js first:")
-            print("     https://nodejs.org/")
-            return False
-        try:
-            install_result = subprocess.run(
-                [npm_cmd, "install", "-g", "mcporter"],
-                capture_output=True, encoding="utf-8", errors="replace", timeout=120,
-            )
-            mcporter_cmd = shutil.which("mcporter")
-            if install_result.returncode == 0 and mcporter_cmd:
-                print("  ✅ mcporter installed")
-            else:
-                print("  [X] mcporter install failed. Retry: npm install -g mcporter (check network/timeout), or try: npx mcporter@latest list")
-                return False
-        except (OSError, subprocess.TimeoutExpired) as e:
-            print(f"  [X] mcporter install failed: {e}")
-            return False
+        return True
 
-    # Configure Exa MCP (free, no key needed)
-    try:
-        from agent_reach.channels.mcporter import (
-            McporterConfigError,
-            configured_server_names,
-        )
-
-        r = subprocess.run(
-            [mcporter_cmd, "config", "list", "--json"],
-            capture_output=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=5,
-        )
-        if r.returncode != 0:
-            raise McporterConfigError("mcporter 配置查询失败")
-        server_names = configured_server_names(r.stdout)
-        if "exa" not in server_names:
-            add_result = subprocess.run(
-                [
-                    mcporter_cmd,
-                    "config",
-                    "add",
-                    "exa",
-                    "https://mcp.exa.ai/mcp",
-                    "--scope",
-                    "home",
-                ],
-                capture_output=True, encoding="utf-8", errors="replace", timeout=10,
-            )
-            if add_result.returncode == 0:
-                print("  ✅ Exa search configured (free, no API key needed)")
-                return True
-            else:
-                print(
-                    "  [!]  Could not configure Exa. Run manually: "
-                    "mcporter config add exa https://mcp.exa.ai/mcp --scope home"
-                )
-                return False
-        else:
-            print("  ✅ Exa search already configured")
-            return True
-    except Exception:
-        print("  [!]  Could not configure Exa. Run manually: mcporter config add exa https://mcp.exa.ai/mcp --scope home")
+    npm_cmd = shutil.which("npm")
+    if not npm_cmd:
+        print("  [!]  mcporter requires Node.js. Install Node.js first:")
+        print("     https://nodejs.org/")
         return False
-
-    # NOTE: xhs-cli is now optional, installed via --channels=xiaohongshu
+    try:
+        install_result = subprocess.run(
+            [npm_cmd, "install", "-g", "mcporter"],
+            capture_output=True, encoding="utf-8", errors="replace", timeout=120,
+        )
+    except (OSError, subprocess.TimeoutExpired) as e:
+        print(f"  [X] mcporter install failed: {e}")
+        return False
+    if install_result.returncode == 0 and shutil.which("mcporter"):
+        print("  ✅ mcporter installed")
+        return True
+    print("  [X] mcporter install failed. Retry: npm install -g mcporter")
+    return False
 
 
 def _install_mcporter_safe():
@@ -1326,11 +1281,9 @@ def _install_mcporter_safe():
 
     if shutil.which("mcporter"):
         print("  ✅ mcporter already installed")
-        print("  To configure Exa search: mcporter config add exa https://mcp.exa.ai/mcp --scope home")
     else:
         print("  -- mcporter not installed")
         print("  To install: npm install -g mcporter")
-        print("  Then configure Exa: mcporter config add exa https://mcp.exa.ai/mcp --scope home")
 
 
 def _detect_environment():
@@ -2041,63 +1994,11 @@ def _cmd_setup():
     print("=" * 40)
     print()
 
-    # Step 1: Exa (via mcporter, no API key required)
-    import shutil
-    import subprocess
+    # Web search and page reading use the agent's built-in WebSearch/WebFetch.
+    print("网页搜索/阅读：使用 Claude Code 内置 WebSearch / WebFetch，无需配置")
+    print()
 
-    print("【推荐】全网搜索 — Exa（通过 mcporter）")
-    print("  免费，无需 API Key")
-
-    if not shutil.which("mcporter"):
-        print("  当前状态: -- mcporter 未安装")
-        print("  安装：npm install -g mcporter")
-        print("  然后：mcporter config add exa https://mcp.exa.ai/mcp --scope home")
-        print()
-    else:
-        try:
-            from agent_reach.channels.mcporter import (
-                McporterConfigError,
-                configured_server_names,
-            )
-
-            r = subprocess.run(
-                ["mcporter", "config", "list", "--json"],
-                capture_output=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=10,
-            )
-            if r.returncode != 0:
-                raise McporterConfigError("mcporter 配置查询失败")
-            if "exa" in configured_server_names(r.stdout):
-                print("  当前状态: ✅ 已配置")
-            else:
-                print("  当前状态: -- 未配置")
-                setup_now = input("  现在自动配置 Exa 吗？[Y/n]: ").strip().lower()
-                if setup_now in ("", "y", "yes"):
-                    add_r = subprocess.run(
-                        [
-                            "mcporter",
-                            "config",
-                            "add",
-                            "exa",
-                            "https://mcp.exa.ai/mcp",
-                            "--scope",
-                            "home",
-                        ],
-                        capture_output=True, encoding="utf-8", errors="replace", timeout=10,
-                    )
-                    if add_r.returncode == 0:
-                        print("  ✅ Exa 已配置")
-                    else:
-                        print("  [!] 自动配置失败，请手动执行：")
-                        print("     mcporter config add exa https://mcp.exa.ai/mcp --scope home")
-        except Exception:
-            print("  [!] 无法检查 Exa 配置，请手动执行：")
-            print("     mcporter config add exa https://mcp.exa.ai/mcp --scope home")
-        print()
-
-    # Step 2: GitHub token
+    # Step 1: GitHub token
     print("【可选】GitHub Token — 提高 API 限额")
     print("  无 token: 60 次/小时 | 有 token: 5000 次/小时")
     print("  获取: https://github.com/settings/tokens (无需任何权限)")
@@ -2113,13 +2014,13 @@ def _cmd_setup():
             print("  跳过。公开 API 也能用")
     print()
 
-    # Step 3: Reddit — rdt-cli
+    # Step 2: Reddit — rdt-cli
     print("【信息】Reddit — 必须登录态（无零配置路径）。桌面推荐 OpenCLI；或 rdt-cli：")
     print(f"  安装：pipx install '{_RDT_GIT_SOURCE}'")
     print("  然后运行：rdt login（需先在浏览器登录 reddit.com）")
     print()
 
-    # Step 4: Groq (Whisper)
+    # Step 3: Groq (Whisper)
     print("【可选】Groq API — 视频无字幕时的语音转文字")
     print("  免费额度，注册: https://console.groq.com")
     current = config.get("groq_api_key")

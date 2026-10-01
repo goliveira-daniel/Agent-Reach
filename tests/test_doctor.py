@@ -44,7 +44,7 @@ class TestDoctor:
                 _StubChannel("web", "网页", 0, "ok", "可抓取网页", ["requests"],
                              active_backend="requests"),
                 _StubChannel("github", "GitHub", 0, "warn", "gh 未安装", ["gh"]),
-                _StubChannel("exa_search", "全网语义搜索", 1, "off", "mcporter 未配置", ["Exa"]),
+                _StubChannel("linkedin", "LinkedIn", 1, "off", "mcporter 未配置", ["mcp-server-linkedin"]),
             ],
         )
 
@@ -67,12 +67,12 @@ class TestDoctor:
                 "backends": ["gh"],
                 "active_backend": None,
             },
-            "exa_search": {
+            "linkedin": {
                 "status": "off",
-                "name": "全网语义搜索",
+                "name": "LinkedIn",
                 "message": "mcporter 未配置",
                 "tier": 1,
-                "backends": ["Exa"],
+                "backends": ["mcp-server-linkedin"],
                 "active_backend": None,
             },
         }
@@ -87,12 +87,12 @@ class TestDoctor:
                     "tier": 0,
                     "backends": ["requests"],
                 },
-                "exa_search": {
+                "linkedin": {
                     "status": "off",
-                    "name": "全网语义搜索",
+                    "name": "LinkedIn",
                     "message": "mcporter 未配置",
                     "tier": 1,
-                    "backends": ["Exa"],
+                    "backends": ["mcp-server-linkedin"],
                 },
                 "xiaohongshu": {
                     "status": "warn",
