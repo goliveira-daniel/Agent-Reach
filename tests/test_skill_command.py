@@ -287,9 +287,12 @@ class TestSkillCommand(unittest.TestCase):
                 self.assertTrue(self._run_install(tmpdir, force=True))
             rmtree.assert_not_called()
 
-            backups = [n for n in os.listdir(skills) if n.startswith("agent-reach.bak-")]
+            # Nothing but the fresh install may remain in the skill root.
+            self.assertEqual(os.listdir(skills), ["agent-reach"])
+            backup_root = os.path.join(tmpdir, ".agent-reach", "skill-backups")
+            backups = os.listdir(backup_root)
             self.assertEqual(len(backups), 1)
-            with open(os.path.join(skills, backups[0], "notes.txt"), encoding="utf-8") as f:
+            with open(os.path.join(backup_root, backups[0], "notes.txt"), encoding="utf-8") as f:
                 self.assertEqual(f.read(), "keep me")
             self.assertTrue(os.path.exists(os.path.join(target, "SKILL.md")))
 

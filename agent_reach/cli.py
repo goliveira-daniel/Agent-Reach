@@ -523,12 +523,18 @@ def _install_skill(force: bool = False, targets=None):
             return skill_pkg.joinpath("SKILL.md").read_text(encoding="utf-8")
 
     def _backup_existing(target: str) -> str:
-        """Move an existing install aside instead of deleting it."""
+        """Move an existing install aside instead of deleting it.
+
+        Backups live outside the skill root so agents don't load them as a
+        second copy of the skill. A failed move aborts the install.
+        """
+        backup_root = os.path.expanduser("~/.agent-reach/skill-backups")
+        os.makedirs(backup_root, exist_ok=True)
         stamp = time.strftime("%Y%m%d-%H%M%S")
-        backup = f"{target}.bak-{stamp}"
+        backup = os.path.join(backup_root, f"agent-reach-{stamp}")
         suffix = 1
         while os.path.lexists(backup):
-            backup = f"{target}.bak-{stamp}-{suffix}"
+            backup = os.path.join(backup_root, f"agent-reach-{stamp}-{suffix}")
             suffix += 1
         os.rename(target, backup)
         return backup

@@ -103,7 +103,7 @@ WebFetch tools; this fork does not configure Exa or Jina Reader.
 
 Finally it installs the skill into `~/.claude/skills/agent-reach` only. An
 existing folder there is preserved; `agent-reach skill --install --force`
-replaces it after moving the old one to `agent-reach.bak-<timestamp>`.
+replaces it after moving the old one to `~/.agent-reach/skill-backups/`.
 
 > 💡 **macOS / Homebrew Python 提示 `externally-managed-environment`？**
 > 这是 PEP 668 保护，不是 Agent Reach 本身的问题。优先用 `pipx install ...`，或先创建 `venv` 再安装。
