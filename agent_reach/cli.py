@@ -155,6 +155,10 @@ def main():
                                help="Install SKILL.md to agent skill directories")
     p_skill_group.add_argument("--uninstall", action="store_true",
                                help="Remove SKILL.md from agent skill directories")
+    p_skill.add_argument("--target", action="append", metavar="SKILLS_DIR",
+                         help="Skill root to install into (repeatable; default: ~/.claude/skills)")
+    p_skill.add_argument("--force", action="store_true",
+                         help="Replace an existing install; the old folder is moved to a backup")
 
     # ── format ──
     p_format = sub.add_parser("format", help="Clean and format platform API output")
@@ -476,11 +480,16 @@ def _cmd_install(args):
         print("Dry run complete. No changes were made.")
 
 
-def _install_skill(force: bool = True):
-    """Install Agent Reach as an agent skill for supported agent clients."""
+def _install_skill(force: bool = False, targets=None):
+    """Install Agent Reach as an agent skill.
+
+    By default the skill goes only into ``~/.claude/skills``. Other agent skill
+    roots are written only when passed explicitly in ``targets``. An existing
+    ``agent-reach`` folder is never deleted: without ``force`` it is preserved,
+    and with ``force`` it is moved aside to a timestamped backup first.
+    """
     import importlib.resources
     import os
-    import shutil
 
     def _is_english_locale(value: str) -> bool:
         normalized = value.strip().lower()
@@ -504,18 +513,25 @@ def _install_skill(force: bool = True):
         except FileNotFoundError:
             return skill_pkg.joinpath("SKILL.md").read_text(encoding="utf-8")
 
+    def _backup_existing(target: str) -> str:
+        """Move an existing install aside instead of deleting it."""
+        stamp = time.strftime("%Y%m%d-%H%M%S")
+        backup = f"{target}.bak-{stamp}"
+        suffix = 1
+        while os.path.lexists(backup):
+            backup = f"{target}.bak-{stamp}-{suffix}"
+            suffix += 1
+        os.rename(target, backup)
+        return backup
+
     def _copy_skill_dir(target: str) -> str | None:
         """Copy entire skill directory (locale-specific SKILL.md + references/)."""
         try:
-            if not force and os.path.exists(os.path.join(target, "SKILL.md")):
-                return "preserved"
-
-            # Clear existing installation. A symlinked skill dir (dotfiles
-            # setups) breaks shutil.rmtree — unlink the link itself instead.
-            if os.path.islink(target):
-                os.unlink(target)
-            elif os.path.exists(target):
-                shutil.rmtree(target)
+            if os.path.lexists(target):
+                if not force:
+                    return "preserved"
+                backup = _backup_existing(target)
+                print(f"  Existing skill moved to backup: {backup}")
             os.makedirs(target, exist_ok=True)
 
             # Get skill directory from package (with fallback for editable installs)
@@ -548,50 +564,24 @@ def _install_skill(force: bool = True):
             print(f"  Warning: Could not install skill: {e}")
             return None
 
-    # Install into every known skill root that already exists.
-    skill_dirs = [
-        (os.path.expanduser("~/.agents/skills"), "Agent"),
-        (os.path.expanduser("~/.config/opencode/skills"), "OpenCode"),
-        (os.path.expanduser("~/.openclaw/skills"), "OpenClaw"),
-        (os.path.expanduser("~/.claude/skills"), "Claude Code"),
+    skill_roots = [
+        os.path.expanduser(str(root))
+        for root in (targets or [os.path.expanduser("~/.claude/skills")])
     ]
 
-    # Insert OPENCLAW_HOME path at the beginning if environment variable is set
-    openclaw_home = os.environ.get("OPENCLAW_HOME")
-    if openclaw_home:
-        skill_dirs.insert(
-            0,
-            (os.path.join(openclaw_home, ".openclaw", "skills"), "OpenClaw"),
-        )
-
     installed = False
-    for skill_dir, platform_name in skill_dirs:
-        if os.path.isdir(skill_dir):
-            target = os.path.join(skill_dir, "agent-reach")
-            status = _copy_skill_dir(target)
-            if status:
-                if status == "preserved":
-                    print(f"Skill already installed for {platform_name}, preserving existing files: {target}")
-                else:
-                    print(f"Skill installed for {platform_name}: {target}")
-                installed = True
-
-    if not installed:
-        # No known skill directory found — create for .agents by default
-        target = os.path.expanduser("~/.agents/skills/agent-reach")
-        os.makedirs(os.path.dirname(target), exist_ok=True)
+    for skill_root in skill_roots:
+        target = os.path.join(skill_root, "agent-reach")
         status = _copy_skill_dir(target)
         if status == "preserved":
             print(f"Skill already installed, preserving existing files: {target}")
+            print("  Re-run with --force to replace it (the old folder is backed up).")
+            installed = True
         elif status == "installed":
             print(f"Skill installed: {target}")
             installed = True
         else:
-            print("  -- Could not install agent skill (optional)")
-            print(
-                "  -- Tip: install OpenCode, OpenClaw, Claude Code, "
-                "or create ~/.agents/skills/ manually"
-            )
+            print(f"  -- Could not install agent skill into {skill_root}")
     return installed
 
 
@@ -635,7 +625,10 @@ def _uninstall_skill():
 def _cmd_skill(args):
     """Manage agent skill registration."""
     if args.install:
-        if not _install_skill():
+        if not _install_skill(
+            force=getattr(args, "force", False),
+            targets=getattr(args, "target", None),
+        ):
             raise SystemExit(1)
     elif args.uninstall:
         _uninstall_skill()

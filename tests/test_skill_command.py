@@ -201,33 +201,85 @@ class TestSkillCommand(unittest.TestCase):
 
             self.assertFalse(os.path.exists(skill_path))
 
-    def test_install_creates_dir_if_parent_exists(self):
-        """_install_skill should create agent-reach dir inside existing skill dir."""
+    def _run_install(self, tmpdir, **kwargs):
+        with patch(
+            "agent_reach.cli.os.path.expanduser",
+            side_effect=lambda p: p.replace("~", tmpdir),
+        ):
+            env = os.environ.copy()
+            env.pop("OPENCLAW_HOME", None)
+            with patch.dict(os.environ, env, clear=True):
+                return _install_skill(**kwargs)
+
+    def test_install_defaults_to_claude_code_only(self):
+        """By default only ~/.claude/skills is written, even if other roots exist."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create the .openclaw/skills parent but not agent-reach subdir
-            skill_parent = os.path.join(tmpdir, ".openclaw", "skills")
-            os.makedirs(skill_parent)
+            other_roots = [
+                os.path.join(tmpdir, ".openclaw", "skills"),
+                os.path.join(tmpdir, ".agents", "skills"),
+                os.path.join(tmpdir, ".config", "opencode", "skills"),
+            ]
+            for root in other_roots:
+                os.makedirs(root)
 
-            with patch(
-                "agent_reach.cli.os.path.expanduser",
-                side_effect=lambda p: p.replace("~", tmpdir),
-            ), patch.dict(os.environ, {}, clear=False):
-                env = os.environ.copy()
-                env.pop("OPENCLAW_HOME", None)
-                with patch.dict(os.environ, env, clear=True):
-                    _install_skill()
+            self.assertTrue(self._run_install(tmpdir))
 
-            target = os.path.join(skill_parent, "agent-reach", "SKILL.md")
+            target = os.path.join(tmpdir, ".claude", "skills", "agent-reach", "SKILL.md")
             self.assertTrue(os.path.exists(target))
             with open(target, encoding="utf-8") as f:
-                content = f.read()
-            self.assertIn("Agent Reach", content)
+                self.assertIn("Agent Reach", f.read())
+            for root in other_roots:
+                self.assertFalse(os.path.exists(os.path.join(root, "agent-reach")))
+
+    def test_install_into_explicit_target(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = os.path.join(tmpdir, "custom-skills")
+            self.assertTrue(self._run_install(tmpdir, targets=[root]))
+            self.assertTrue(os.path.exists(os.path.join(root, "agent-reach", "SKILL.md")))
+            self.assertFalse(os.path.exists(os.path.join(tmpdir, ".claude")))
+
+    def test_install_preserves_existing_without_force(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            target = os.path.join(tmpdir, ".claude", "skills", "agent-reach")
+            os.makedirs(target)
+            marker = os.path.join(target, "SKILL.md")
+            with open(marker, "w", encoding="utf-8") as f:
+                f.write("user edits")
+
+            self.assertTrue(self._run_install(tmpdir))
+
+            with open(marker, encoding="utf-8") as f:
+                self.assertEqual(f.read(), "user edits")
+
+    def test_force_install_backs_up_instead_of_deleting(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skills = os.path.join(tmpdir, ".claude", "skills")
+            target = os.path.join(skills, "agent-reach")
+            os.makedirs(target)
+            with open(os.path.join(target, "notes.txt"), "w", encoding="utf-8") as f:
+                f.write("keep me")
+
+            with patch("shutil.rmtree") as rmtree:
+                self.assertTrue(self._run_install(tmpdir, force=True))
+            rmtree.assert_not_called()
+
+            backups = [n for n in os.listdir(skills) if n.startswith("agent-reach.bak-")]
+            self.assertEqual(len(backups), 1)
+            with open(os.path.join(skills, backups[0], "notes.txt"), encoding="utf-8") as f:
+                self.assertEqual(f.read(), "keep me")
+            self.assertTrue(os.path.exists(os.path.join(target, "SKILL.md")))
+
+    def test_skill_command_passes_target_and_force(self):
+        with patch("agent_reach.cli._install_skill", return_value=True) as install:
+            _cmd_skill(
+                Namespace(install=True, uninstall=False, target=["/x"], force=True)
+            )
+        install.assert_called_once_with(force=True, targets=["/x"])
 
     def test_install_uses_english_skill_for_english_locale(self):
         """_install_skill should install the English skill file for English locales."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            skill_parent = os.path.join(tmpdir, ".openclaw", "skills")
-            os.makedirs(skill_parent)
+            skill_parent = os.path.join(tmpdir, ".claude", "skills")
 
             with patch(
                 "agent_reach.cli.os.path.expanduser",

@@ -53,7 +53,7 @@ def test_skill_frontmatter_uses_opencode_supported_fields():
         ), resource_name
 
 
-def test_install_skill_discovers_opencode_global_directory(tmp_path: Path):
+def test_install_skill_skips_opencode_unless_targeted(tmp_path: Path):
     skill_parent = tmp_path / ".config" / "opencode" / "skills"
     skill_parent.mkdir(parents=True)
 
@@ -62,6 +62,8 @@ def test_install_skill_discovers_opencode_global_directory(tmp_path: Path):
         side_effect=lambda value: value.replace("~", os.fspath(tmp_path)),
     ), patch.dict(os.environ, {}, clear=True):
         _install_skill()
+        assert not (skill_parent / "agent-reach").exists()
+        _install_skill(targets=["~/.config/opencode/skills"])
 
     installed = skill_parent / "agent-reach" / "SKILL.md"
     assert installed.is_file()
