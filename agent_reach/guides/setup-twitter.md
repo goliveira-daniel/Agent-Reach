@@ -22,7 +22,7 @@ which twitter && echo "installed" || echo "not installed"
 2. 安装 twitter-cli：
 
 ```bash
-pipx install twitter-cli
+pipx install 'twitter-cli==0.8.5'
 ```
 
 3. 确认命令已安装（此时不做认证请求）：
@@ -67,7 +67,7 @@ agent-reach configure twitter-cookies --sync-legacy-twitter
 
 如果你已经知道 `auth_token` 和 `ct0`：
 
-1. 安装 twitter-cli（如果没装）：`pipx install twitter-cli`
+1. 安装 twitter-cli（如果没装）：`pipx install 'twitter-cli==0.8.5'`
 
 2. 设置环境变量：
 

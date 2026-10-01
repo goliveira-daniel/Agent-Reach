@@ -63,7 +63,7 @@ A: 重新通过 Cookie-Editor 手工导出，再运行
 A: 推荐使用住宅代理：`export HTTP_PROXY="http://user:pass@ip:port"`。
 
 **Q: xhs-cli 不支持我的系统？**
-A: 确保 Python 3.10+ 和 pipx 已安装。运行 `pipx install xiaohongshu-cli` 即可。
+A: xhs-cli 上游已停更，本 fork 不安装也不推荐新装；桌面用 OpenCLI，服务器用 xiaohongshu-mcp。
 
 ## 服务器方案：Docker MCP
 

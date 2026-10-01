@@ -20,7 +20,7 @@
 - Auto-installs dependencies: `agent-reach install --env=auto`
 - Browser-session / cookie auth for platforms that require login (Twitter, Reddit, Facebook, Instagram, XiaoHongShu, Xueqiu)
 - Proxy support for platforms that block server IPs (Reddit, Twitter)
-- Zero API fees: all backends are free and open-source (OpenCLI, twitter-cli, rdt-cli, bili-cli, yt-dlp, Jina Reader, mcporter/Exa, etc.)
+- Zero API fees: all backends are free and open-source (OpenCLI, twitter-cli, rdt-cli, bili-cli, yt-dlp, mcporter, etc.; web search/reading via the agent's built-in tools)
 
 ## Troubleshooting
 

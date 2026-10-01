@@ -109,7 +109,7 @@ curl -s -b /tmp/bili_ck.txt -A "$UA" -e "https://www.bilibili.com/" \
   "https://api.bilibili.com/x/web-interface/search/all/v2?keyword=QUERY&page=1"
 ```
 
-> **安装 bili-cli**: `pipx install bilibili-cli`（上游 2026-03 起停更但实测健康；只读场景无需登录，`bili login` 扫码可解锁动态/收藏等个人功能）。
+> **安装 bili-cli**: `pipx install 'bilibili-cli==0.6.2'`（钉定版本；上游 2026-03 起停更但实测健康；只读场景无需登录，`bili login` 扫码可解锁动态/收藏等个人功能）。
 
 ## 小宇宙播客 / Xiaoyuzhou Podcast
 

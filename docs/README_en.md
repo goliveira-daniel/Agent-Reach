@@ -1,5 +1,14 @@
 <h1 align="center">👁️ Agent Reach</h1>
 
+> **Hardened fork** of [Panniantong/agent-reach](https://github.com/Panniantong/agent-reach), pinned to tag
+> `v1.5.0-hardened.1`. Differences: every tool install is pinned to an exact version
+> (`agent_reach/pins.py`); no remote install/update instructions; Exa and Jina Reader removed
+> (use the agent's built-in WebSearch/WebFetch); the skill installs only into
+> `~/.claude/skills` and never deletes an existing folder; the skill treats fetched content as
+> untrusted and is read-only. Install from a local checkout: see `docs/install.md`.
+> Feature descriptions below are from upstream and may mention removed backends.
+
+
 <p align="center">
   <strong>Give your AI Agent one-click access to the entire internet</strong>
 </p>
@@ -75,7 +84,7 @@ To connect your Agent to these platforms, you'd have to find tools, install depe
 **Agent Reach turns this into one command:**
 
 ```
-Install Agent Reach: https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
+Install Agent Reach: ~/src/agent-reach/docs/install.md
 ```
 
 Copy that to your Agent. A few minutes later, it can read tweets, search Reddit, and watch Bilibili.
@@ -83,7 +92,7 @@ Copy that to your Agent. A few minutes later, it can read tweets, search Reddit,
 **Already installed? Update in one command:**
 
 ```
-Update Agent Reach: https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md
+Update Agent Reach: ~/src/agent-reach/docs/update.md
 ```
 
 ### ✅ Before you start, you might want to know
@@ -136,19 +145,19 @@ Update Agent Reach: https://raw.githubusercontent.com/Panniantong/agent-reach/ma
 Copy this to your AI Agent (Claude Code, OpenClaw, Cursor, etc.):
 
 ```
-Install Agent Reach: https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
+Install Agent Reach: ~/src/agent-reach/docs/install.md
 ```
 
 The Agent installs the Python package, checks your environment, and tells you what's ready. System-level changes require an explicit `--system` flag.
 
 > 🔄 **Already installed?** Update in one command:
 > ```
-> Update Agent Reach: https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md
+> Update Agent Reach: ~/src/agent-reach/docs/update.md
 > ```
 
 > 🛡️ **Safe by default:** `agent-reach install` checks the machine without installing system packages or writing configuration:
 > ```
-> Safely check and install Agent Reach: https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
+> Safely check and install Agent Reach: ~/src/agent-reach/docs/install.md
 > ```
 > Use `agent-reach install --system` only after explicitly approving system changes.
 
@@ -156,7 +165,7 @@ The Agent installs the Python package, checks your environment, and tells you wh
 <summary>Manual install</summary>
 
 ```bash
-pip install https://github.com/Panniantong/agent-reach/archive/main.zip
+pipx install ~/src/agent-reach --pip-args="-c $HOME/src/agent-reach/constraints.txt"
 agent-reach install --env=auto
 ```
 </details>
@@ -184,7 +193,7 @@ After the Skill is installed, the Agent will auto-detect whether `agent-reach` C
 
 No configuration needed — just tell your Agent:
 
-- "Read this link" → `curl https://r.jina.ai/URL` for any web page
+- "Read this link" → built-in WebFetch for any web page
 - "What's this GitHub repo about?" → `gh repo view owner/repo`
 - "What does this video cover?" → `yt-dlp --dump-json URL` for subtitles
 - "Read this tweet" → set `TWITTER_AUTH_TOKEN` / `TWITTER_CT0`, then run `twitter tweet URL`

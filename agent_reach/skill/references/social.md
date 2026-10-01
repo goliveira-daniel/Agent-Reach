@@ -124,13 +124,13 @@ twitter likes
 ### search 失败时的重试链（按序执行，成功即停）
 
 1. 直接重试一次（偶发失败常见）：`twitter search "query" -n 10`
-2. 升级后再试：`pipx upgrade twitter-cli && twitter search "query" -n 10`
+2. 重装钉定版本后再试：`pipx install --force 'twitter-cli==0.8.5' && twitter search "query" -n 10`
 3. 换 OpenCLI 备选（桌面，复用浏览器登录态）：`opencli twitter search "query" -f yaml`
 4. 都不行就改用 `twitter feed` / `twitter user-posts @somebody` 等稳定命令绕路
 
 ### 重要注意事项
 
-> **安装**: `pipx install twitter-cli`（确保 v0.8.5+）
+> **安装**: `pipx install 'twitter-cli==0.8.5'`（钉定版本，见 `agent_reach/pins.py`）
 >
 > **认证**: 只用 Cookie-Editor 手工导出，再显式设置环境变量
 > `TWITTER_AUTH_TOKEN` + `TWITTER_CT0`；不要依赖自动浏览器读取。

@@ -85,13 +85,9 @@ twitter search "test" -n 1
 proxychains twitter search "test" -n 1
 ```
 
-### 方案 3：不用 twitter-cli，用 Exa 搜索替代
+### 方案 3：不用 twitter-cli，用内置 WebSearch 替代
 
-twitter-cli 不可用时，可以直接用 Exa 搜索 Twitter 内容：
-
-```bash
-mcporter call exa.web_search_exa query="site:x.com 搜索词" numResults=5
-```
+twitter-cli 不可用时，可用 Agent 内置 WebSearch 搜索 `site:x.com 搜索词`。
 
 ### 方案 4：检查认证
 

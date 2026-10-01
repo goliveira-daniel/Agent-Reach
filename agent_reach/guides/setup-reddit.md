@@ -44,12 +44,8 @@ rdt read POST_ID
 无。用户明确授权后，rdt-cli 通过
 `agent-reach install --env=auto --system --channels=reddit` 安装。
 
-## Fallback：Exa 搜索
+## Fallback：内置 WebSearch
 
-如果你已经配置了 Exa（通过 mcporter），也可以通过 Exa 搜索 Reddit 内容：
-
-```bash
-mcporter call exa.web_search_exa query="site:reddit.com python best practices" numResults=5
-```
+rdt-cli / OpenCLI 都不可用时，可用 Agent 内置 WebSearch 搜索 `site:reddit.com 关键词`。
 
 rdt-cli 是当前推荐方案，无需额外配置即可使用。

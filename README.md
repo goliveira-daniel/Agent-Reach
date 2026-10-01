@@ -1,5 +1,13 @@
 <h1 align="center">👁️ Agent Reach</h1>
 
+> **Hardened fork** of [Panniantong/agent-reach](https://github.com/Panniantong/agent-reach), pinned to tag
+> `v1.5.0-hardened.1`. Differences: every tool install is pinned to an exact version
+> (`agent_reach/pins.py`); no remote install/update instructions; Exa and Jina Reader removed
+> (use the agent's built-in WebSearch/WebFetch); the skill installs only into
+> `~/.claude/skills` and never deletes an existing folder; the skill treats fetched content as
+> untrusted and is read-only. Install from a local checkout: see `docs/install.md`.
+> Feature descriptions below are from upstream and may mention removed backends.
+
 <p align="center">
   <strong>给你的 AI Agent 一键装上互联网能力</strong>
 </p>
@@ -76,7 +84,7 @@ AI Agent 已经能帮你写代码、改文档、管项目——但你让它去�
 **Agent Reach 把这件事变成一句话：**
 
 ```
-帮我安装 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
+帮我安装 Agent Reach：~/src/agent-reach/docs/install.md
 ```
 
 复制给你的 Agent，几分钟后它就能读推特、搜 Reddit、看 YouTube、刷小红书了。
@@ -84,7 +92,7 @@ AI Agent 已经能帮你写代码、改文档、管项目——但你让它去�
 **已经装过了？更新也是一句话：**
 
 ```
-帮我更新 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md
+帮我更新 Agent Reach：~/src/agent-reach/docs/update.md
 ```
 
 > ⭐ **Star 这个项目**，我们会持续追踪各平台的变化、接入新的渠道。你不用自己盯——平台封了我们修，有新渠道我们加。
@@ -148,19 +156,19 @@ AI Agent 已经能帮你写代码、改文档、管项目——但你让它去�
 复制这句话给你的 AI Agent（Claude Code、OpenClaw、Cursor 等）：
 
 ```
-帮我安装 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
+帮我安装 Agent Reach：~/src/agent-reach/docs/install.md
 ```
 
 就这一步。Agent 会自己完成剩下的所有事情。
 
 > 🔄 **已安装过？** 更新也是一句话：
 > ```
-> 帮我更新 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md
+> 帮我更新 Agent Reach：~/src/agent-reach/docs/update.md
 > ```
 
 > 🛡️ **默认安全：** `agent-reach install` 默认只检查环境，不会自动装系统包或写入配置：
 > ```
-> 帮我安全检查并安装 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
+> 帮我安全检查并安装 Agent Reach：~/src/agent-reach/docs/install.md
 > ```
 > 只有在你明确允许修改系统后，才使用 `agent-reach install --system`。
 
@@ -183,7 +191,7 @@ AI Agent 已经能帮你写代码、改文档、管项目——但你让它去�
 
 不需要任何配置，告诉 Agent 就行：
 
-- "帮我看看这个链接" → `curl https://r.jina.ai/URL` 读任意网页
+- "帮我看看这个链接" → built-in WebFetch 读任意网页
 - "这个 GitHub 仓库是做什么的" → `gh repo view owner/repo`
 - "这个 YouTube 视频讲了什么" → `yt-dlp` 提取字幕
 - "B站搜一下 AI 教程" → `bili search`（无需登录）
