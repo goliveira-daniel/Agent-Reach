@@ -26,17 +26,40 @@ class TestSkillCommand(unittest.TestCase):
         self.assertTrue(default_skill.strip())
         self.assertTrue(english_skill.strip())
 
-    def test_exa_reference_uses_default_registered_tools_only(self):
-        """Agent instructions must not call Exa tools disabled by default."""
-        search_reference = (
-            importlib.resources.files("agent_reach")
-            .joinpath("skill", "references", "search.md")
-            .read_text(encoding="utf-8")
-        )
+    def test_skill_text_has_no_remote_or_third_party_reader_paths(self):
+        """Skill text must not fetch remote instructions or use Exa/Jina."""
+        root = importlib.resources.files("agent_reach").joinpath("skill")
+        files = [root.joinpath("SKILL.md"), root.joinpath("SKILL_en.md")]
+        files += [f for f in root.joinpath("references").iterdir() if f.name.endswith(".md")]
+        for f in files:
+            text = f.read_text(encoding="utf-8")
+            with self.subTest(file=f.name):
+                for banned in (
+                    "raw.githubusercontent.com",
+                    "r.jina.ai",
+                    "exa.web_search_exa",
+                    "mcp.exa.ai",
+                    "check-update",
+                    "conda run",
+                    "@latest",
+                    "MUST USE",
+                ):
+                    self.assertNotIn(banned, text)
 
-        self.assertIn("web_search_exa", search_reference)
-        self.assertNotIn("exa.get_code_context_exa", search_reference)
-        self.assertNotIn("get_code_context_exa(", search_reference)
+    def test_skill_declares_untrusted_content_and_read_only_rules(self):
+        root = importlib.resources.files("agent_reach").joinpath("skill")
+        en = root.joinpath("SKILL_en.md").read_text(encoding="utf-8")
+        zh = root.joinpath("SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("untrusted data", en)
+        self.assertIn("never post, comment", en)
+        self.assertIn("Use when the user asks to read or search", en)
+        self.assertIn("不可信数据", zh)
+        self.assertIn("不发帖", zh)
+        self.assertIn("Use when the user asks to read or search", zh)
+        for text in (en, zh):
+            self.assertIn("WebSearch", text)
+            self.assertIn("WebFetch", text)
+            self.assertIn("127.0.0.1", text)
 
     def test_mcporter_examples_use_shell_safe_named_arguments(self):
         """Packaged commands must survive PowerShell and POSIX parsing."""

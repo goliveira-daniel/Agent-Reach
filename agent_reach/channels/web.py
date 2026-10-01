@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Web — generic pages are read with the agent's built-in WebFetch tool.
 
-This fork removed the Jina Reader (r.jina.ai) proxy: page URLs are no longer
-sent to a third-party reader service. The channel stays registered so doctor
+This fork removed the third-party reader proxy: page URLs are no longer sent
+to an external reader service. The channel stays registered so doctor
 can tell the agent which tool to use for arbitrary URLs.
 """
 

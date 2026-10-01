@@ -18,15 +18,11 @@ mcporter call linkedin.get_company_profile company_name="openai" sections="posts
 mcporter call linkedin.search_jobs keywords="software engineer" location="Remote" max_pages=2
 ```
 
-> **需要登录**: 首次使用前运行 `uvx mcp-server-linkedin@latest --login`，保存有效登录态。
+> **需要登录**: 首次使用前运行 `uvx mcp-server-linkedin@4.24.3 --login`，保存有效登录态。
 
 ### Fallback 方案
 
-如果 MCP 不可用，可以用 Jina Reader：
-
-```bash
-curl -s "https://r.jina.ai/https://linkedin.com/in/username"
-```
+如果 MCP 不可用，公开页面可用内置 WebFetch 读取（登录墙后的内容读不到）。
 
 ## Boss直聘
 

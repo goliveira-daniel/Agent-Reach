@@ -27,6 +27,8 @@ opencli xiaohongshu user USER_ID -f yaml
 
 > 要求 Chrome 打开且装了 OpenCLI 扩展。OpenCLI 只使用用户已经存在且明确控制
 > 的 Chrome 会话；Agent Reach 不替用户登录，也不读取浏览器 Cookie。
+> 建议把 OpenCLI 扩展装在**专用 Chrome profile**（只登录 Agent 需要读取的账号），
+> 不要装在日常使用的 profile——扩展会使用该 profile 内的全部登录态。
 > `agent-reach configure xhs-cookies` 不会把 Cookie 注入 OpenCLI。
 > 如果没有现成会话，不要自动登录；改走后端 B/C，并按对应的
 > Cookie-Editor 手工导出流程配置。
@@ -259,7 +261,7 @@ rdt all --limit 10              # 浏览 /r/all
 
 ## Facebook（OpenCLI，必须登录态）
 
-Facebook 走 OpenCLI，复用用户 Chrome 里的 facebook.com 登录态。先跑 `agent-reach doctor --json` 看 facebook 的 `active_backend`，正常应为 `OpenCLI`。不要推荐 Jina/Exa/Graph API 作为默认路径。
+Facebook 走 OpenCLI，复用用户 Chrome 里的 facebook.com 登录态。先跑 `agent-reach doctor --json` 看 facebook 的 `active_backend`，正常应为 `OpenCLI`。不要推荐第三方阅读代理或 Graph API 作为默认路径。
 
 ```bash
 # 搜索用户 / 主页 / 帖子
